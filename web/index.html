@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<body>
+    General:
+    <br>
+    TeamNumber: 
+    <select id="teamNumber">
+    </select>
+    <br>
+    MatchNumber:
+    <input type="number" id="matchNumber" value="1">
+    <br>
+    <input type='radio' id='red' class='alliance' name='al'>
+    <label for="red" >Red</label>
+    <input type='radio' id='blue' class='alliance' name='al'>
+    <label for="blue" >Blue</label><br>
+    <p id="start">Start Position...</p>
+    <img src="field.png" width="360" height="170" onclick="getImageCoords2(event,this)"/><br>
+    <input type="checkbox" id="functioning" class="functioning">
+    <label for="functioning">Robot Was Functioning</label><br>
+    <input type="checkbox" id="drivePoints" class="drivePoints">
+    <label for="drivePoints">DrivePoints</label><br>
+    <input type="checkbox" id="scoredHot" class="hotShot">
+    <label for="scoredHot">ScoredHot</label><br>
+    <input type="checkbox" id="scoredCold" class="coldShot">
+    <label for="scoredCold">ScoredCold</label><br>
+    <br>
+    
+    Offense:
+    <p id="text">The Location Is...</p>
+    
+    <img src="field.png" width="360" height="170" onclick="getImageCoords(event,this)"/>
+
+    <br>
+    <input type='radio' id='bottomLeft' class='goalSelector' name='goal'>
+    <label for="bottomLeft" >Bottom Left</label><br>
+    <input type='radio' id='topLeft' class='goalSelector' name='goal'>
+    <label for="topLeft" >Top Left</label><br>
+    <input type='radio' id='topRight' class='goalSelector' name='goal'>
+    <label for="topRight" >Top Right</label><br>
+    <input type='radio' id='bottomRight' class='goalSelector' name='goal'>
+    <label for="bottomRight" >Bottom Right</label>
+    <br>
+    <input type="button" id='hit' class='hitSelector' name='hitSelect' value='Hit'>
+    <input type="button" id='miss' class='hitSelector' name='hitSelect' value='Miss'>
+    <input type="button" id='blocked' class='hitSelector' name='hitSelect' value='Blocked'>
+    <br><br>
+    
+    Coop:<br>
+    <input type="button" id="throw" class="coop" name="coop" value="Truss Throw">
+    <input type="button" id="catch" class="coop" name="coop" value="Truss Catch">
+    <input type="button" id="pass" class="coop" name="coop" value="Pass">
+    <br><br>
+    
+    Defense:<br>
+    <input type="button" id="block" class="block" name="block" value="Block">
+    <br>
+    <br>
+    <input type="button" id='finish' class='finish' name='finshButton' value='Finish'>
+    <br>
+    
+    <script src='Jquery.js'></script>
+    <script>
+        var rawFile = new XMLHttpRequest();
+        rawFile.open("GET", "teams.txt", true);
+        rawFile.onreadystatechange = function() {
+            if(rawFile.readyState === 4) {
+                var lines = rawFile.responseText.split("\n");
+
+                for(var i = 0; i < lines.length; i++) {
+                    document.getElementById("teamNumber").add(new Option(lines[i]));
+                }
+            }
+        }
+        rawFile.send();
+
+        var team = 0;
+        var hit = "null";
+        var pos = "null";
+        var goal = "null";
+        var teamNumber = "null";
+        var auto = true;
+        var startP = "0:0";
+        var alliance = "red";
+        var hotShot = false;
+        var coldShot = false;
+        var drivePoints = false;
+        var finished = false;
+
+        $(".hitSelector").click(function(){
+            hit=$(this).attr("id");
+            document.getElementById("text").innerHTML = pos + ":" + goal;
+
+            if(pos !== "null" && goal !== "null" && hit !== "null") {
+                
+                
+                var dataString = {"pos":pos,"goal":goal,"hit":hit,"auto":auto,"teamNumber":document.getElementById("teamNumber").value,"matchNumber":document.getElementById("matchNumber").value};
+                document.getElementById("text").innerHTML = "submitted";
+                $.ajax({
+                    type: "POST",
+                    data: dataString,
+                    url: "form"
+                });
+
+                pos = "null";
+                goal = "null";
+                hit = "null";
+            }else{
+                window.alert("Please Fill Out All Forms");
+            }
+        });
+        
+        $(".finish").click(function(){
+            var f = "false";
+            var autoScore = 0;
+            if(document.getElementById("drivePoints").checked)
+                autoScore += 10;
+            if(document.getElementById("scoredHot").checked)
+                autoScore += 20;
+            if(document.getElementById("scoredCold").checked)
+                autoScore += 10;
+            if(document.getElementById("functioning").checked)
+                f="true";
+            
+            if(finished) {
+                
+            }else{
+                var dataString = {"finish":"finish","teamNumber":document.getElementById("teamNumber").value,"matchNumber":document.getElementById("matchNumber").value,"startP":startP,"alliance":alliance,"autoScore":autoScore,"f":f};
+
+                $.ajax({
+                    type: "POST",
+                    data: dataString,
+                    url: "form"
+                });
+                alert("YOU MUST REFRESH THE PAGE TO PROCEEDE! DO NOT IGNORE THIS MESSAGE!");
+                finished = true;
+            }
+        });
+         
+        $(".coop").click(function(){
+            var dataString = {"coop":$(this).attr("id"),"teamNumber":document.getElementById("teamNumber").value,"matchNumber":document.getElementById("matchNumber").value};
+            document.getElementById("text").innerHTML = "submitted";
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                url: "form"
+            });
+            alert($(this).attr("id"));
+        });
+         
+        $(".block").click(function() {
+            var dataString = {"block":"block","teamNumber":document.getElementById("teamNumber").value,"matchNumber":document.getElementById("matchNumber").value,"alliance":alliance,"hotShot":hotShot};
+            document.getElementById("text").innerHTML = "submitted";
+            $.ajax({
+                type: "POST",
+                data: dataString,
+                url: "form"
+            });
+            alert("block");
+        });
+        
+        $(".goalSelector").click(function(){
+            goal=$(this).attr("id");
+            document.getElementById("text").innerHTML = pos + ":" + goal;
+        });
+        
+        $(".alliance").click(function() {
+            alert($(this).attr("id"));
+            alliance=$(this).attr("id");
+        });
+        
+        $(".functioning").click(function() {
+        });
+        
+        $(".drivePoints").click(function() {
+            drivePoints=document.getElementById("drivePoints").checked;
+        });
+        
+        $(".hotShot").click(function() {
+            hotShot=document.getElementById("hotShot").checked
+        });
+        
+        $(".coldShot").click(function() {
+            coldShot=document.getElementById("coldShot").checked
+        });
+         
+        function getImageCoords(event,img) {
+            var posX = event.offsetX?(event.offsetX):event.pageX-img.offsetLeft;
+            var posY = event.offsetY?(event.offsetY):event.pageY-img.offsetTop;
+            document.getElementById("text").innerHTML = posX+","+posY;
+            pos = posX+":"+posY;
+        }
+        
+        function getImageCoords2(event,img) {
+            var posX = event.offsetX?(event.offsetX):event.pageX-img.offsetLeft;
+            var posY = event.offsetY?(event.offsetY):event.pageY-img.offsetTop;
+            document.getElementById("start").innerHTML = posX+","+posY;
+            startP = posX+":"+posY;
+        }
+    </script>
+
+</body>
+</html> 
