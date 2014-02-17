@@ -189,6 +189,7 @@
             var posY = event.offsetY?(event.offsetY):event.pageY-img.offsetTop;
             document.getElementById("text").innerHTML = posX+","+posY;
             pos = posX+":"+posY;
+            
         }
         
         function getImageCoords2(event,img) {
@@ -196,7 +197,11 @@
             var posY = event.offsetY?(event.offsetY):event.pageY-img.offsetTop;
             document.getElementById("start").innerHTML = posX+","+posY;
             startP = posX+":"+posY;
+            image1.onload = function() {
+                context.drawEllipse(image1, 25, 25);
+            };
         }
+         
     </script>
 
 </body>
